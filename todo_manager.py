@@ -1,7 +1,8 @@
 import json
 import os
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
+
 
 class TodoManager:
     def __init__(self, data_file: str = "todos.json"):
@@ -11,27 +12,27 @@ class TodoManager:
     def ensure_data_file(self):
         """确保数据文件存在"""
         if not os.path.exists(self.data_file):
-            with open(self.data_file, 'w', encoding='utf-8') as f:
+            with open(self.data_file, "w", encoding="utf-8") as f:
                 json.dump([], f)
 
-    def load_todos(self) -> List[Dict[str, Any]]:
+    def load_todos(self) -> list[dict[str, Any]]:
         """从文件加载任务列表"""
         try:
-            with open(self.data_file, 'r', encoding='utf-8') as f:
+            with open(self.data_file, encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             return []
 
-    def save_todos(self, todos: List[Dict[str, Any]]):
+    def save_todos(self, todos: list[dict[str, Any]]):
         """保存任务列表到文件"""
-        with open(self.data_file, 'w', encoding='utf-8') as f:
+        with open(self.data_file, "w", encoding="utf-8") as f:
             json.dump(todos, f, ensure_ascii=False, indent=2)
 
-    def get_all_todos(self) -> List[Dict[str, Any]]:
+    def get_all_todos(self) -> list[dict[str, Any]]:
         """获取所有任务"""
         return self.load_todos()
 
-    def add_todo(self, title: str, description: str = "") -> Dict[str, Any]:
+    def add_todo(self, title: str, description: str = "") -> dict[str, Any]:
         """添加新任务"""
         todos = self.load_todos()
         new_todo = {
@@ -40,13 +41,13 @@ class TodoManager:
             "description": description,
             "completed": False,
             "created_at": datetime.now().isoformat(),
-            "completed_at": None
+            "completed_at": None,
         }
         todos.append(new_todo)
         self.save_todos(todos)
         return new_todo
 
-    def update_todo(self, todo_id: int, **kwargs) -> Dict[str, Any]:
+    def update_todo(self, todo_id: int, **kwargs) -> dict[str, Any]:
         """更新任务"""
         todos = self.load_todos()
         for todo in todos:
@@ -70,7 +71,7 @@ class TodoManager:
             return True
         return False
 
-    def get_todo_by_id(self, todo_id: int) -> Dict[str, Any]:
+    def get_todo_by_id(self, todo_id: int) -> dict[str, Any]:
         """根据ID获取任务"""
         todos = self.load_todos()
         for todo in todos:
