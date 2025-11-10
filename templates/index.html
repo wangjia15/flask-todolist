@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TodoList</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .add-todo-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .add-todo-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .add-todo-form input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .add-todo-form input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .add-todo-form button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .add-todo-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        .todo-list {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .todo-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .todo-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .todo-item.completed {
+            background: #f8f9fa;
+            opacity: 0.7;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .todo-item.completed .todo-title {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .todo-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .todo-date {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .add-todo-form {
+                flex-direction: column;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 TodoList</h1>
+            <p>管理您的日常任务</p>
+        </div>
+
+        <div class="add-todo-section">
+            <form id="addTodoForm" class="add-todo-form">
+                <input type="text" id="todoTitle" placeholder="添加新任务..." required>
+                <button type="submit">添加任务</button>
+            </form>
+        </div>
+
+        <div class="todo-list" id="todoList">
+            {% if todos %}
+                {% for todo in todos %}
+                <div class="todo-item {% if todo.completed %}completed{% endif %}" data-id="{{ todo.id }}">
+                    <input type="checkbox" class="todo-checkbox" {% if todo.completed %}checked{% endif %}>
+                    <div class="todo-content">
+                        <div class="todo-title">{{ todo.title }}</div>
+                        {% if todo.description %}
+                        <div class="todo-description">{{ todo.description }}</div>
+                        {% endif %}
+                        <div class="todo-date">
+                            创建于: {{ todo.created_at[:19].replace('T', ' ') }}
+                            {% if todo.completed_at %}
+                            | 完成于: {{ todo.completed_at[:19].replace('T', ' ') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="todo-actions">
+                        <button class="btn-delete" onclick="deleteTodo({{ todo.id }})">删除</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>🎯 还没有任务</h3>
+                    <p>添加您的第一个任务开始吧！</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTodos">{{ todos|length }}</div>
+                <div class="stat-label">总任务</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="completedTodos">{{ todos|selectattr('completed')|list|length }}</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="pendingTodos">{{ todos|rejectattr('completed')|list|length }}</div>
+                <div class="stat-label">待完成</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加任务
+        document.getElementById('addTodoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('todoTitle').value.trim();
+            if (!title) return;
+
+            try {
+                const response = await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: ''
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('todoTitle').value = '';
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error adding todo:', error);
+            }
+        });
+
+        // 切换任务状态
+        document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', async (e) => {
+                const todoItem = e.target.closest('.todo-item');
+                const todoId = parseInt(todoItem.dataset.id);
+
+                try {
+                    const response = await fetch(`/api/todos/${todoId}/toggle`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error toggling todo:', error);
+                }
+            });
+        });
+
+        // 删除任务
+        async function deleteTodo(todoId) {
+            if (!confirm('确定要删除这个任务吗？')) return;
+
+            try {
+                const response = await fetch(`/api/todos/${todoId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+    </script>
+</body>
+</html>
